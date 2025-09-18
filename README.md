@@ -1,3 +1,63 @@
+# Bifrost dev setup
+- Clone https://github.com/voxel51/fiftyone into the parent folder of this repo.
+
+# Calling operators
+
+Pattern for calling Python operators from JavaScript:
+
+1. Import the executeOperator function:
+import { executeOperator } from "@fiftyone/operators";
+
+2. Call Python operators using the full operator name:
+executeOperator("@pluginNamespace/operatorName",
+parameters)
+
+Example:
+
+If you have a Python operator defined like this in fiftyone.yml:
+```
+operators:
+  - my_python_operator
+```
+
+And the corresponding Python code:
+```python
+class MyPythonOperator(foo.Operator):
+    @property
+    def config(self):
+        return foo.OperatorConfig(
+            name="my_python_operator",
+            label="My Python Operator",
+        )
+
+    def execute(self, ctx):
+        # Python logic here
+        return {"result": "success"}
+
+def register(plugin):
+    plugin.register(MyPythonOperator)
+```
+
+You would call it from the frontend component like:
+```typescript
+const [result, setResult] = useState<any>(null);
+
+useEffect(() => {
+  executeOperator("@bifrostai/cvcov/my_python_operator", {
+    param1: "value1",
+    param2: "value2",
+  }).then((res) => setResult(res));
+}, []);
+```
+The operator name format is:
+"@namespace/plugin-name/operator-name" where:
+- @namespace is your plugin namespace (like @bifrostai)      
+- plugin-name is your plugin name (like cvcov)
+- operator-name is the name defined in the Python
+operator's config
+
+# Plugin template description (original)
+
 This is a template for writing and building a Javascript panel plugin in FiftyOne. Once a plugin is built (as a bundled UMD file), it can be loaded into FiftyOne.
 
 The three most important / notable files are described below.
@@ -22,7 +82,7 @@ e. `resolutions`: Also used to resolve dependency conflicts, this is usually use
 
 ## 3. `vite.config.ts`
 
-This file is used to configure the Vite build tool. It is used to bundle the plugin into a UMD script that can be loaded in the panel. The `defineConfig` function from the `fiftyone-js-plugin-build` package is used to define the Vite configuration. The `defineConfig` function takes two arguments: the directory of the plugin and an optional configuration object. The configuration object can be used to override the default Vite configuration. For example, you can use it to specify whether or not to generate sourcemaps, or to force bundle third party dependencies. The `defineConfig` function returns a Vite configuration object that can be used to build the plugin. An exmaple of how to use the `defineConfig` function is shown below:
+This file is used to configure the Vite build tool. It is used to bundle the plugin into a UMD script that can be loaded in the panel. The `defineConfig` function from the `fiftyone-js-plugin-build` package is used to define the Vite configuration. The `defineConfig` function takes two arguments: the directory of the plugin and an optional configuration object. The configuration object can be used to override the default Vite configuration. For example, you can use it to specify whether or not to generate sourcemaps. The `defineConfig` function returns a Vite configuration object that can be used to build the plugin. An example of how to use the `defineConfig` function is shown below:
 
 ```js
 import { defineConfig } from "@voxel51/fiftyone-js-plugin-build";
@@ -33,21 +93,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const dir = __dirname;
 
-// if you optionally want to bundle in third party dependencies,
-// you can specify them here, either as names or as regexes
-const myPluginThirdPartyDependencies = [
-    "my-third-party-dependency",
-    /my-other-third-party-dependency-.*/
-];
-
 const myAdditionalVitePlugins = [
     // add any additional Vite plugins here
 ];
 
 export default defineConfig(dir, {
   buildConfigOverride: { sourcemap: true },
-  forceBundleDependencies: myPluginThirdPartyDependencies,
-  plugins: myAdditionalVitePlugins
+  plugins: myAdditionalVitePlugins,
 });
 ```
 
