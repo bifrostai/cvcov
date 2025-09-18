@@ -1,9 +1,13 @@
-name: "@voxel51/hello-world"
-description: An example of a simple FiftyOne Javascript plugin
-version: 1.0.0
+name: "@bifrostai/cvcov"
+description: Manage and fix test coverage for computer vision
+version: 0.1.0
 fiftyone:
   version: "*"
-url: https://github.com/voxel51/hello-world-plugin-js
-license: Apache 2.0
+url: https://github.com/bifrostai/cvcov
+license: MIT
 operators:
   - show_alert
+  - fetch_annotations
+  - get_progress
+  - compute_embeddings
+  - cluster_embeddings
